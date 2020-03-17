@@ -63,7 +63,7 @@ func CompareVal(x *[]interface{}, y *[]interface{}) ([]interface{}, error) {
 		if s, ok := g.(MapData); ok {
 			tmp := make(map[string][]map[string]string, 0)
 			for _, t := range s.Data {
-				b, err := comMe(t, y)
+				b, err := comMe(s.Year, t, y)
 				if err != nil {
 					return nil, err
 				}
@@ -77,18 +77,20 @@ func CompareVal(x *[]interface{}, y *[]interface{}) ([]interface{}, error) {
 }
 
 
-func comMe(x map[string]int, k *[]interface{}) (map[string]string, error) {
+func comMe(year int, x map[string]int, k *[]interface{}) (map[string]string, error) {
 	res := map[string]string {}
 	for v, w := range x {
 		for _, r := range *k {
 			if s, ok := r.(MapData); ok {
-				for _, b := range s.Data {
-					if val, ok := b[v]; ok {
-						s := val - w
-						res[v] = strconv.Itoa(s)
-						return res, nil
-					}else {
-						res[v] = "Media_Not_Found"
+				if year == s.Year {
+					for _, b := range s.Data {
+						if val, ok := b[v]; ok {
+							s := val - w
+							res[v] = strconv.Itoa(s)
+							return res, nil
+						}else {
+							res[v] = "Media_Not_Found"
+						}
 					}
 				}
 			}
