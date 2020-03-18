@@ -44,6 +44,7 @@ func main()  {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	log.Print(mmcXesN...)
 
 	//mmcloud x elastic old index online-news-isa-*
 	mmcXesOO, err := CompareVal(&mmC, &esOO)

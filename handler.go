@@ -58,10 +58,10 @@ func ReadXls(fileName string, dataMap interface{}) ([]interface{}, error)  {
 }
 
 func CompareVal(x *[]interface{}, y *[]interface{}) ([]interface{}, error) {	
-	var storeData	[]interface{}
+	var storeData []interface{}
 	for _, g := range *x {
 		if s, ok := g.(MapData); ok {
-			tmp := make(map[string][]map[string]string, 0)
+			tmp := make(map[string][]map[string][]string, 0)
 			for _, t := range s.Data {
 				b, err := comMe(s.Year, t, y)
 				if err != nil {
@@ -77,19 +77,26 @@ func CompareVal(x *[]interface{}, y *[]interface{}) ([]interface{}, error) {
 }
 
 
-func comMe(year int, x map[string]int, k *[]interface{}) (map[string]string, error) {
-	res := map[string]string {}
+func comMe(year int, x map[string]int, k *[]interface{}) (map[string][]string, error) {
+	res := map[string][]string{}
 	for v, w := range x {
 		for _, r := range *k {
 			if s, ok := r.(MapData); ok {
 				if year == s.Year {
 					for _, b := range s.Data {
+						store := make([]string, 0)
 						if val, ok := b[v]; ok {
-							s := val - w
-							res[v] = strconv.Itoa(s)
+							st := val - w
+							sAf := strconv.Itoa(st)
+							valAf := strconv.Itoa(val)
+							wAf := strconv.Itoa(w)
+							store = append(store, wAf, valAf, sAf)
+							res[v] = store
 							return res, nil
 						}else {
-							res[v] = "Media_Not_Found"
+							wAf := strconv.Itoa(w)
+							store = append(store, wAf, "NOTFOUND", "")
+							res[v] = store
 						}
 					}
 				}
@@ -104,23 +111,42 @@ func makeXls(x *[]interface{}, nameFile string) error  {
 	xls := excelize.NewFile()
 	for _, v := range *x {
 		
-		for x, y := range v.(map[string][]map[string]string) {
+		for x, y := range v.(map[string][]map[string][]string) {
 			sheetName := x
 			index := xls.NewSheet(sheetName)
 			xls.SetCellValue(sheetName, "A1", "Source")
-			xls.SetCellValue(sheetName, "B1", "Comparasi")
+			xls.SetCellValue(sheetName, "B1", "Jumlah MMC")
+			xls.SetCellValue(sheetName, "C1", "Jumlah Elastic IMA")
+			xls.SetCellValue(sheetName, "D1", "Comparasi")
+
 			for m, n := range y {
-				for k, l := range n {
-					xls.SetCellValue(sheetName, fmt.Sprintf("A%d", m+2), k)
-					if l != "Media_Not_Found" {
-						l, _ := strconv.Atoi(l)
-						xls.SetCellValue(sheetName, fmt.Sprintf("B%d", m+2), l)	
+				for sm, sn := range n {
+					xls.SetCellValue(sheetName, fmt.Sprintf("A%d",m+2), sm)
+					if !ValInSlice(sn, "NOTFOUND") {
+						for i, valM := range sn { 
+							valMn, _ := strconv.Atoi(valM)
+							switch	i {
+							case 0:
+								xls.SetCellValue(sheetName, fmt.Sprintf("B%d",m+2), valMn)
+							case 1:
+								xls.SetCellValue(sheetName, fmt.Sprintf("C%d",m+2), valMn)
+							case 2:
+								xls.SetCellValue(sheetName, fmt.Sprintf("D%d",m+2), valMn)
+							}
+						}
 					}else {
-						xls.SetCellValue(sheetName, fmt.Sprintf("B%d", m+2), l)	
+						for i, valM := range sn { 
+							switch	i {
+							case 0:
+								valMn, _ := strconv.Atoi(valM)
+								xls.SetCellValue(sheetName, fmt.Sprintf("B%d",m+2), valMn)
+							case 1:
+								xls.SetCellValue(sheetName, fmt.Sprintf("C%d",m+2), valM)
+							case 2:
+								xls.SetCellValue(sheetName, fmt.Sprintf("D%d",m+2), valM)
+							}
+						}
 					}
-						
-					
-					
 				}
 			}
 			xls.SetActiveSheet(index)
@@ -134,4 +160,13 @@ func makeXls(x *[]interface{}, nameFile string) error  {
 	}
 
 	return nil
+}
+
+func ValInSlice(s []string, e string) bool  {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
