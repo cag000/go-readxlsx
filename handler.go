@@ -29,22 +29,38 @@ func ReadXls(fileName string, dataMap interface{}) ([]interface{}, error)  {
 					var mn StoreSome
 					if strings.Contains(mediaMe, "+") {
 						// a := mediaMe
-						a := strings.ReplaceAll(mediaMe, "+", "")
-						b := strings.ToLower(a)
-						mn.NameMedia = b
+						c := strings.ReplaceAll(mediaMe, "+", "")
+						if strings.Contains(c, "_") {
+							a := strings.ReplaceAll(c, "_", "")
+							b := strings.ToLower(a)
+							mn.NameMedia = b
+						}else {
+							b := strings.ToLower(c)
+							mn.NameMedia = b
+						}
 						mn.Count = count
 					}
 					if strings.Contains(mediaMe, " ") {
 						// a := mediaMe
 						a := strings.ReplaceAll(mediaMe, " ", "")
-						b := strings.ToLower(a)
-						mn.NameMedia = b
+						if strings.Contains(a, "_") {
+							b := strings.ToLower(strings.ReplaceAll(a, "_", ""))
+							mn.NameMedia = b
+						}else {
+							b := strings.ToLower(a)
+							mn.NameMedia = b
+						}
 						mn.Count = count
 					}
 					if !strings.Contains(mediaMe, "+") && !strings.Contains(mediaMe, " ") {
 						a := mediaMe
-						b := strings.ToLower(a)
-						mn.NameMedia = b
+						if strings.Contains(a, "_") {
+							b := strings.ToLower(strings.ReplaceAll(a, "_", ""))
+							mn.NameMedia = b
+						}else {
+							b := strings.ToLower(a)
+							mn.NameMedia = b
+						}
 						mn.Count = count
 					}
 					c.ManipulateMM(mn)
